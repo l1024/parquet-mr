@@ -93,7 +93,7 @@ public class TupleReadSupport extends ReadSupport<Tuple> {
     return parsePigSchema(pigMetaData.getPigSchema());
   }
 
-  private static Schema union(Schema merged, Schema pigSchema) throws FrontendException {
+  protected static Schema union(Schema merged, Schema pigSchema) throws FrontendException {
     List<FieldSchema> fields = new ArrayList<Schema.FieldSchema>();
     if (merged == null) {
       return pigSchema;
