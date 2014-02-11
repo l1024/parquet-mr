@@ -28,7 +28,9 @@ import parquet.thrift.struct.ThriftType.*;
 import parquet.thrift.struct.ThriftTypeID;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 
 public class ThriftSchemaConverter {
@@ -61,16 +63,22 @@ public class ThriftSchemaConverter {
 
   private StructType toStructType(TStructDescriptor struct) {
     List<Field> fields = struct.getFields();
-    List<ThriftField> children = new ArrayList<ThriftField>(fields.size());
+    ThriftField[] children = new ThriftField[fields.size()];
     for (int i = 0; i < fields.size(); i++) {
       Field field = fields.get(i);
       Requirement req =
           field.getFieldMetaData() == null ?
               Requirement.OPTIONAL :
                 Requirement.fromType(field.getFieldMetaData().requirementType);
-      children.add(toThriftField(field.getName(), field, req));
+      children[i] = toThriftField(field.getName(), field, req);
     }
-    return new StructType(children);
+    Arrays.sort(children, new Comparator<ThriftField>() {
+      @Override
+      public int compare(ThriftField f1, ThriftField f2) {
+        return Short.compare(f1.getFieldId(), f2.getFieldId());
+      }
+    });
+    return new StructType(Arrays.asList(children));
   }
 
   private ThriftField toThriftField(String name, Field field, ThriftField.Requirement requirement) {
