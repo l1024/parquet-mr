@@ -71,3 +71,8 @@ struct StructWithExtraField {
   3: required Phone extraPhone,
   6: required Phone phone
 }
+
+struct ReorderedStruct {
+  2: i32 b;
+  1: i32 a;
+}

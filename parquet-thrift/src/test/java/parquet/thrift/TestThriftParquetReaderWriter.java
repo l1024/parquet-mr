@@ -31,6 +31,7 @@ import com.twitter.data.proto.tutorial.thrift.AddressBook;
 import com.twitter.data.proto.tutorial.thrift.Name;
 import com.twitter.data.proto.tutorial.thrift.Person;
 import com.twitter.data.proto.tutorial.thrift.PhoneNumber;
+import parquet.thrift.test.ReorderedStruct;
 
 public class TestThriftParquetReaderWriter {
 
@@ -66,5 +67,32 @@ public class TestThriftParquetReaderWriter {
       Assert.assertEquals(original, read);
       thriftParquetReader.close();
     }
+  }
+
+  @Test
+  public void testReorderedThriftSchema() throws Exception {
+
+    Configuration configuration = new Configuration();
+    Path f = new Path("target/test/TestThriftParquetReaderWriter");
+    FileSystem fs = f.getFileSystem(configuration);
+    if (fs.exists(f)) {
+      fs.delete(f, true);
+    }
+
+    ReorderedStruct original = new ReorderedStruct(1,2);
+
+    { // write
+      ThriftParquetWriter<ReorderedStruct> thriftParquetWriter = new ThriftParquetWriter<ReorderedStruct>(f, ReorderedStruct.class, CompressionCodecName.UNCOMPRESSED);
+      thriftParquetWriter.write(original);
+      thriftParquetWriter.close();
+    }
+
+    { // read
+      ThriftParquetReader<ReorderedStruct> thriftParquetReader = new ThriftParquetReader<ReorderedStruct>(f, ReorderedStruct.class);
+      ReorderedStruct read = thriftParquetReader.read();
+      thriftParquetReader.close();
+      Assert.assertEquals(original, read);
+    }
+
   }
 }
